@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 import send from "./assets/send.svg";
 import user from "./assets/user.png";
@@ -6,38 +7,88 @@ import bot from "./assets/bot.png";
 import loadingIcon from "./assets/loader.svg";
 
 function App() {
-  const [input, setInput] = useState("");
-  const [posts, setPosts] = useState([]);
+    const [input, setInput] = useState("");
+    const [posts, setPosts] = useState([]);
 
-  const onSubmit = () => {
-    if (input.trim() === "") return;
-    updatePosts(input);
-    
-};
+    useEffect(() => {
+        document.querySelector(".layout").scrollTop =
+            document.querySelector(".layout").scrollHeight;
+    }, [posts]);
 
-const updatePosts = (post) => {
-    
-        setPosts((prevState) => {
-            return [
-                ...prevState,
-                {
-                    type: "user",
-                    post,
+    const fetchBotResponse = async () => {
+        const { data } = await axios.post(
+            "http://localhost:4000",
+            { input:input },
+            {
+                headers: {
+                    "Content-Type": "application/json",
                 },
-            ];
+            }
+        );
+        return data;
+    };
+
+    const autoTypingBotResponse = (text) => {
+        let index = 0;
+        let interval = setInterval(() => {
+            if (index < text.length) {
+                setPosts((prevState) => {
+                    let lastItem = prevState.pop();
+                    if (lastItem.type !== "bot") {
+                        prevState.push({
+                            type: "bot",
+                            post: text.charAt(index - 1),
+                        });
+                    } else {
+                        prevState.push({
+                            type: "bot",
+                            post: lastItem.post + text.charAt(index - 1),
+                        });
+                    }
+                    return [...prevState];
+                });
+                index++;
+            } else {
+                clearInterval(interval);
+            }
+        }, 20);
+    };
+
+    const onSubmit = () => {
+        if (input.trim() === "") return;
+        updatePosts(input);
+        updatePosts("loading...", false, true);
+        setInput("");
+        fetchBotResponse().then((res) => {
+            console.log(res.bot.trim());
+            updatePosts(res.bot.trim(), true);
         });
-    
-};
+    };
 
-const onKeyUp = (e) => {
-    if (e.key === "Enter" || e.which === 13) {
-        onSubmit();
-    }
-};
+    const updatePosts = (post, isBot, isLoading) => {
+        if (isBot) {
+            autoTypingBotResponse(post);
+        } else {
+            setPosts((prevState) => {
+                return [
+                    ...prevState,
+                    {
+                        type: isLoading ? "loading" : "user",
+                        post,
+                    },
+                ];
+            });
+        }
+    };
 
+    const onKeyUp = (e) => {
+        if (e.key === "Enter" || e.which === 13) {
+            onSubmit();
+        }
+    };
 
-  return (
-    <main className="chatGPT-app">
+    return (
+        <main className="chatGPT-app">
             <section className="chat-container">
                 <div className="layout">
                     {posts.map((post, index) => (
@@ -85,7 +136,7 @@ const onKeyUp = (e) => {
                 </div>
             </footer>
         </main>
-      );
-    }
+    );
+}
 
 export default App;

@@ -103,7 +103,7 @@ footer {
     width: fit-content;
     max-width: 100%;
     min-height: 40px;
-    background: #11a4ff;
+    background: #3b9ff1;
     border-radius: 22px;
     white-space: pre-wrap;
 }
@@ -115,7 +115,7 @@ footer {
     width: fit-content;
     max-width: 100%;
     min-height: 40px;
-    background: #ffffff;
+    background: #a4a2b1;
     border-radius: 22px;
     display: flex;
     align-items: center;

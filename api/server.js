@@ -12,7 +12,7 @@ app.use(express.json());
 app.get("/", async (req, res) => {
     res.status(200).send({
         message:
-            "This is ChatGPT AI APP server url, please visit https://chatgpt-ai-app-od21.onrender.com",
+            "This is ChatGPT AI APP ",
     });
 });
 
@@ -31,7 +31,7 @@ app.post("/", async (req, res) => {
             top_p: 1,
             frequency_penalty: 0.5,
             presence_penalty: 0,
-            
+            stop: ["\"\"\""],
           });
 
           console.log("PASSED: ", req.body.input);
